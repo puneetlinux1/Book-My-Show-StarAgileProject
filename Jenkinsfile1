@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node' // Rechecked and fixed: 'nodejs' must be lowercase in Jenkins DSL
+        nodejs 'node23' // Rechecked and fixed: 'nodejs' must be lowercase in Jenkins DSL
     }
 
     environment {
