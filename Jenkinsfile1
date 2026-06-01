@@ -53,7 +53,7 @@ pipeline {
         }
         stage('OWASP FS Scan') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-CHECK'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
@@ -68,10 +68,10 @@ pipeline {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
                         sh ''' 
                         echo "Building Docker image..."
-                        docker build --no-cache -t kastrov/bms:latest -f bookmyshow-app/Dockerfile bookmyshow-app
+                        docker build --no-cache -t puneetsharma25/bms:latest -f bookmyshow-app/Dockerfile bookmyshow-app
 
                         echo "Pushing Docker image to registry..."
-                        docker push kastrov/bms:latest
+                        docker push puneetsharma25/bms:latest
                         '''
                     }
                 }
@@ -85,13 +85,13 @@ pipeline {
                 docker rm bms || true
 
                 echo "Running new container on port 3000..."
-                docker run -d --restart=always --name bms -p 3000:3000 kastrov/bms:latest
+                docker run -d --restart=always --name bms -p 3000:3000 puneetsharma25/bms:latest
 
                 echo "Checking running containers..."
                 docker ps -a
 
                 echo "Fetching logs..."
-                sleep 5  # Give time for the app to start
+                sleep 5
                 docker logs bms
                 '''
             }
@@ -99,13 +99,15 @@ pipeline {
     }
     post {
         always {
-            emailext attachLog: true,
+            emailext(
+                attachLog: true,
                 subject: "'${currentBuild.result}'",
                 body: "Project: ${env.JOB_NAME}<br/>" +
                       "Build Number: ${env.BUILD_NUMBER}<br/>" +
                       "URL: ${env.BUILD_URL}<br/>",
-                to: 'kastrokiran@gmail.com, puneetlinux1@gmail.com'
+                to: 'kastrokiran@gmail.com, puneetlinux1@gmail.com',
                 attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+            )
         }
     }
 }
